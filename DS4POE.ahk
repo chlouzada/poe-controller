@@ -21,6 +21,7 @@ utilityFlask := 5
 lifeFlask := 1
 manaFlask := 2
 
+FlaskAutoToggle := true
 FlaskAutoDuration := 4000
 FlaskAutoDelay := 500
 FlaskAutoPosition := 345
@@ -73,10 +74,13 @@ FlaskUtility(){
 }
 
 FlaskAuto(){
+global FlaskAutoDelay
+global FlaskAutoDuration
+global FlaskAutoPosition
 IfWinActive, Path of Exile
   If (A_TickCount > tc_flask + FlaskAutoDuration ) {
     Sleep, %FlaskAutoDelay%
-    Send, %FlaskAutoNumber%
+    Send, %FlaskAutoPosition%
     tc_flask := A_TickCount
   }
 }
@@ -273,6 +277,8 @@ return
 
 Joy8:: ; RT2
 Click, down, right
+if FlaskAutoToggle
+	FlaskAuto()
 SetTimer, WaitForButtonUp8, %SetTimerDelay%
 return
 
