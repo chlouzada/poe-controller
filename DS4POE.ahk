@@ -12,11 +12,18 @@ CoordMode, Mouse, Screen
 defaultCenterX = 960
 defaultCenterY = 470
 
-toggleJoyLeft := true
+UpPOV := "Ctrl"
+DownPOV := "p"
+LeftPOV := "i"
+RightPOV := "Tab"
 
-flaskDuration := 4000
-flaskDelay := 500
-flaskNumber := 345
+utilityFlask := 5
+lifeFlask := 1
+manaFlask := 2
+
+FlaskAutoDuration := 4000
+FlaskAutoDelay := 500
+FlaskAutoPosition := 345
 
 JoyMultiplier := 8
 JoyMultiplierPrecision := 0.3
@@ -25,12 +32,17 @@ JoystickNumber := 1
 
 JoyThreshold = 5
 InvertYAxis := false
+TriggerThreshold = 10
+
+SetTimerDelay := 5
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; END OF CONFIG
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; toggleJoyLeft := true
 
 JoyThresholdUpper := 50 + JoyThreshold
 JoyThresholdLower := 50 - JoyThreshold
@@ -45,47 +57,26 @@ else
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-ReleaseKey(key) {
-	GetKeyState, state, %key%
-	if state = D
-		Send {%key% up}
-	else
-		return false
-	return true
+FlaskLife(){
+	global lifeFlask
+	Send, %lifeFlask%
 }
 
-PressKey(key) {
-	GetKeyState, state, %key%
-	if state = U
-		Send {%key% down}
-	else
-		return false
-	return true
+FlaskMana(){
+	global manaFlask
+	Send, %manaFlask%
 }
 
-ReleaseClick(btn) {
-	GetKeyState, state, %btn%
-	if state = D
-		Click, btn, up
-	else
-		return false
-	return true
+FlaskUtility(){
+	global utilityFlask
+	Send, %utilityFlask%
 }
 
-PressClick(btn) {
-	GetKeyState, state, %btn%
-	if state = U
-		Click, btn, down
-	else
-		return false
-	return true
-}
-
-AutoFlask(){
+FlaskAuto(){
 IfWinActive, Path of Exile
-  If (A_TickCount > tc_flask + flaskDuration ) {
-    Sleep, %flaskDelay%
-    Send, %flaskNumber%
+  If (A_TickCount > tc_flask + FlaskAutoDuration ) {
+    Sleep, %FlaskAutoDelay%
+    Send, %FlaskAutoNumber%
     tc_flask := A_TickCount
   }
 }
@@ -96,10 +87,9 @@ IfWinActive, Path of Exile
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-SetTimer, WatchJoyLeft, 10
-SetTimer, WatchJoyRight, 5
-SetTimer, WatchPOV, 5
-
+SetTimer, WatchJoyLeft, %SetTimerDelay%
+SetTimer, WatchJoyRight, %SetTimerDelay%
+SetTimer, WatchPOV, %SetTimerDelay%
 
 WatchJoyLeft:
 MouseNeedsToBeMoved := false  ; Set default.
@@ -177,20 +167,40 @@ return
 
 
 WatchPOV:
+; Old
+; POV := GetKeyState("JoyPOV")
+; KeyToHoldDownPrev := KeyToHoldDown
+; if (POV < 0)   ; No angle to report
+;     KeyToHoldDown := ""
+; else if (POV > 31500)               ; 315 to 360 degrees: Forward
+;     KeyToHoldDown := "Ctrl"
+; else if POV between 0 and 4500      ; 0 to 45 degrees: Forward
+;     KeyToHoldDown := "Ctrl"
+; else if POV between 4501 and 13500  ; 45 to 135 degrees: Right
+;     KeyToHoldDown := "Numpad6"
+; else if POV between 13501 and 22500 ; 135 to 225 degrees: Down
+;     KeyToHoldDown := "Numpad2"
+; else                                ; 225 to 315 degrees: Left
+;     KeyToHoldDown := "Numpad4"
+; if (KeyToHoldDown = KeyToHoldDownPrev)
+;     return
+; SetKeyDelay -1
+; if KeyToHoldDownPrev
+;     Send, {%KeyToHoldDownPrev% up}
+; if KeyToHoldDown  
+;     Send, {%KeyToHoldDown% down}
 POV := GetKeyState("JoyPOV")
 KeyToHoldDownPrev := KeyToHoldDown
-if (POV < 0)   ; No angle to report
-    KeyToHoldDown := ""
-else if (POV > 31500)               ; 315 to 360 degrees: Forward
-    KeyToHoldDown := "Ctrl"
-else if POV between 0 and 4500      ; 0 to 45 degrees: Forward
-    KeyToHoldDown := "Ctrl"
-else if POV between 4501 and 13500  ; 45 to 135 degrees: Right
-    KeyToHoldDown := "Numpad6"
-else if POV between 13501 and 22500 ; 135 to 225 degrees: Down
-    KeyToHoldDown := "Numpad2"
-else                                ; 225 to 315 degrees: Left
-    KeyToHoldDown := "Numpad4"
+if (POV < 0)
+	KeyToHoldDown := ""
+else if (POV = 0) ;	Up
+    KeyToHoldDown := UpPOV
+else if (POV = 9000) ; Left
+    KeyToHoldDown := LeftPOV
+else if POV = 18000 ; Down
+    KeyToHoldDown := DownPOV
+else ; Right
+    KeyToHoldDown := RightPOV
 if (KeyToHoldDown = KeyToHoldDownPrev)
     return
 SetKeyDelay -1
@@ -216,14 +226,14 @@ return
 WaitForButtonUp7:
 if GetKeyState("Joy7")
     return
-Send, {q up}
+Click, up, left
 SetTimer, WaitForButtonUp7, Off
 return
 
 WaitForButtonUp8:
 if GetKeyState("Joy8")
     return
-Click, up
+Click, up, right
 SetTimer, WaitForButtonUp8, Off
 return
 
@@ -233,38 +243,60 @@ return
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-Joy2::
-Click, down, left
-SetTimer, WaitForButtonUp2, 10
+Joy1:: ; SQUARE
+Send, t
 return
 
-Joy1::
+Joy2:: ; X
+if GetKeyState("Joy7") ;; Unclick Protect
+    return
+Click, down, left
+SetTimer, WaitForButtonUp2, %SetTimerDelay%
+return
+
+Joy3:: ; CIRCLE
+FlaskUtility()
+return
+
+Joy4:: ; TRIANGLE
+FlaskLife()
+return
+
+Joy5:: ; LT1
+FlaskMana()
+return
+
+Joy7:: ; LT2
+Click, down, left
+SetTimer, WaitForButtonUp7, %SetTimerDelay%
+return
+
+Joy8:: ; RT2
+Click, down, right
+SetTimer, WaitForButtonUp8, %SetTimerDelay%
+return
+
+Joy9:: ; SHARE
 Send, {Space}
 return
 
-Joy5::
-Send, 1
+Joy10:: ; OPTIONS
+Send, {Esc}
 return
 
-Joy7::
-Send, {q down}
-SetTimer, WaitForButtonUp7, 10
-return
+; Joy11:: ;; NO USE
+; if toggleJoyLeft
+; 	SetTimer, WatchJoyLeft, Off
+; else
+; 	SetTimer, WatchJoyLeft, %SetTimerDelay%
+; toggleJoyLeft := !toggleJoyLeft
+; return
 
-Joy8::
-Click, down
-SetTimer, WaitForButtonUp8, 10
-return
-
-Joy11::
-if toggleJoyLeft
-	SetTimer, WatchJoyLeft, Off
-else
-	SetTimer, WatchJoyLeft, 5
-toggleJoyLeft := !toggleJoyLeft
-return
-
-; Hotkeys
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; HOTKEY
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 F3::ExitApp
 F4::Reload
