@@ -9,37 +9,42 @@ CoordMode, Mouse, Screen
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+; Auto move with left axis
 AutoMove := true
 
+; Inventory location of Portal scroll
 PortalX := 1300
 PortalY := 615
 
+; Positions of flask
 utilityFlask := 5
 lifeFlask := 1
 manaFlask := 2
 
+; Auto use flask while attacking (Bind to RT2)
 FlaskAutoToggle := true
 FlaskAutoDuration := 4000
-FlaskAutoDelay := 500
 FlaskAutoPosition := 345
 
+; Set of Shortcuts
 UpPOV := "Ctrl"
 DownPOV := "p"
 LeftPOV := "i"
 RightPOV := "Tab"
 
+; Central position of char
 defaultCenterX = 960
 defaultCenterY = 470
 
-JoystickNumber := 1
-JoyMultiplier := 3
-JoyMultiplierPrecision := 0.3
+; Joystick config
+JoystickNumber := 1 ; Number of controller
+JoyMultiplier := 3 ; Circle radius of left axis
+JoyMultiplierPrecision := 0.3 ; Sensibility of mouse movement with right axis
 
 JoyThreshold = 5
 InvertYAxis := false
-TriggerThreshold = 10
 
-SetTimerDelay := 5
+SetTimerDelay := 5 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -55,6 +60,8 @@ if InvertYAxis
 	YAxisMultiplier = -1
 else
 	YAxisMultiplier = 1
+
+tc_flask := 0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -77,13 +84,12 @@ FlaskUtility(){
 	Send, %utilityFlask%
 }
 
-FlaskAuto(){
-global FlaskAutoDelay
+FlaskAuto(ByRef tc_flask){
 global FlaskAutoDuration
 global FlaskAutoPosition
 IfWinActive, Path of Exile
-  If (A_TickCount > tc_flask + FlaskAutoDuration ) {
-    ;Sleep, %FlaskAutoDelay%
+  If (A_TickCount > tc_flask + FlaskAutoDuration) {
+		ToolTip, tc_flask
     Send, %FlaskAutoPosition%
     tc_flask := A_TickCount
   }
@@ -205,7 +211,7 @@ else
 	DeltaY = 0
 if MouseNeedsToBeMoved
 {
-	SetMouseDelay, -1  ; Makes movement smoother.
+	SetMouseDelay, -1
 	MouseMove, DeltaX * JoyMultiplierPrecision, DeltaY * JoyMultiplierPrecision * YAxisMultiplier, 0, R
 }
 return
@@ -303,7 +309,7 @@ return
 Joy8:: ; RT2
 Click, down, right
 if FlaskAutoToggle
-	FlaskAuto()
+	FlaskAuto(tc_flask)
 SetTimer, WaitForButtonUp8, %SetTimerDelay%
 return
 
@@ -321,12 +327,6 @@ return
 
 Joy12:: ; RS
 return
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-; HOTKEY
-;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 F3::ExitApp
 F4::Reload
