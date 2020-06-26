@@ -2,12 +2,6 @@
 
 Comandos básicos do Path of Exile com controle  
 
-## Files
-
-DS4POE      Main script  
-JoyRemap    Joystick hotkeys  
-Labels      Labels aux  
-
 ## Hotkeys
 
 KB  
@@ -24,7 +18,7 @@ RT  (none)
 LT  (none)  
 
 X         Click (*)  
-Square    T  
+Square    Hotkey T  
 Triangle  Life flask  
 Circle    Utility flask  
 
