@@ -2,13 +2,13 @@
 
 Comandos básicos do Path of Exile com controle  
 
-# Files
+## Files
 
 DS4POE      Main script  
 JoyRemap    Joystick hotkeys  
 Labels      Labels aux  
 
-# Hotkeys
+## Hotkeys
 
 KB  
 F3 Close  
