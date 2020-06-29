@@ -34,11 +34,11 @@ RightPOV := "Tab"
 
 ; Central position of char
 defaultCenterX = 960
-defaultCenterY = 470
+defaultCenterY = 520
 
 ; Joystick config
 JoystickNumber := 1 ; Number of controller
-JoyMultiplier := 3 ; Circle radius of left axis
+JoyMultiplier := 11 ; Circle radius of left axis
 JoyMultiplierPrecision := 0.3 ; Sensibility of mouse movement with right axis
 
 JoyThreshold = 5
@@ -89,7 +89,6 @@ global FlaskAutoDuration
 global FlaskAutoPosition
 IfWinActive, Path of Exile
   If (A_TickCount > tc_flask + FlaskAutoDuration) {
-		ToolTip, tc_flask
     Send, %FlaskAutoPosition%
     tc_flask := A_TickCount
   }
@@ -111,8 +110,8 @@ MovementSkill(ByRef JoyMultiplier){
 		aux := JoyMultiplier
 		JoyMultiplier := 12
 
-		x := defaultCenterX + (JoyX-10) * JoyMultiplier 
-		y := defaultCenterY + (JoyY-10) * JoyMultiplier  * YAxisMultiplier
+		x := defaultCenterX + (JoyX) * JoyMultiplier 
+		y := defaultCenterY + (JoyY) * JoyMultiplier  * YAxisMultiplier
 		MouseMove, x, y, 0
 		
 		Sleep, 50
