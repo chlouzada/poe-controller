@@ -1,8 +1,6 @@
 #SingleInstance Force
 #Persistent
 
-CoordMode, Mouse, Screen
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; CONFIG
@@ -27,10 +25,10 @@ FlaskAutoDuration := 4000
 FlaskAutoPosition := 345
 
 ; Set of Shortcuts
-UpPOV := "Ctrl"
-DownPOV := "p"
-LeftPOV := "i"
-RightPOV := "Tab"
+UpPOV := "Menu"
+DownPOV := "Tab"
+LeftPOV := "Ctrl"
+RightPOV := "Shift"
 
 ; Central position of char
 defaultCenterX = 960
@@ -38,7 +36,7 @@ defaultCenterY = 520
 
 ; Joystick config
 JoystickNumber := 1 ; Number of controller
-JoyMultiplier := 11 ; Circle radius of left axis
+JoyMultiplier := 10 ; Circle radius of left axis
 JoyMultiplierPrecision := 0.3 ; Sensibility of mouse movement with right axis
 
 JoyThreshold = 5
@@ -54,6 +52,8 @@ SetTimerDelay := 5
 
 ; toggleJoyLeft := true
 
+CoordMode, Mouse, Screen
+
 JoyThresholdUpper := 50 + JoyThreshold
 JoyThresholdLower := 50 - JoyThreshold
 if InvertYAxis
@@ -62,6 +62,10 @@ else
 	YAxisMultiplier = 1
 
 tc_flask := 0
+
+JoyMultiplierDefault := JoyMultiplier
+
+menuToggle := false
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -103,24 +107,22 @@ AutoPortal(){
 	MouseClick, left, 630, 400 ; Char Pos
 }
 
-MovementSkill(ByRef JoyMultiplier){
-	GetKeyState, JoyX, %JoystickNumber%JoyX
-	GetKeyState, JoyY, %JoystickNumber%JoyY
-	if ((JoyX > 55 || JoyX < 45) && (JoyY > 55 || JoyY < 45)) {
-		aux := JoyMultiplier
-		JoyMultiplier := 12
-
-		x := defaultCenterX + (JoyX) * JoyMultiplier 
-		y := defaultCenterY + (JoyY) * JoyMultiplier  * YAxisMultiplier
-		MouseMove, x, y, 0
-		
-		Sleep, 50
-		Send, t
-		Sleep, 10
-		JoyMultiplier := aux
-	} else
-		Send, t
-}
+; MovementSkill(ByRef JoyMultiplier){
+; 	GetKeyState, JoyX, %JoystickNumber%JoyX
+; 	GetKeyState, JoyY, %JoystickNumber%JoyY
+; 	if ((JoyX > 55 || JoyX < 45) && (JoyY > 55 || JoyY < 45)) {
+; 		aux := JoyMultiplier
+; 		JoyMultiplier := 10
+; 		x := defaultCenterX + (JoyX - 10) * JoyMultiplier 
+; 		y := defaultCenterY + (JoyY - 10) * JoyMultiplier  * YAxisMultiplier
+; 		MouseMove, x, y, 0
+; 		Sleep, 50
+; 		SendInput, t
+; 		Sleep, 70
+; 		JoyMultiplier := aux
+; 	} else
+; 		Send, t
+; }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -215,7 +217,6 @@ if MouseNeedsToBeMoved
 }
 return
 
-
 WatchPOV:
 POV := GetKeyState("JoyPOV")
 KeyToHoldDownPrev := KeyToHoldDown
@@ -224,18 +225,26 @@ if (POV < 0)
 else if (POV = 0) ;	Up
     KeyToHoldDown := UpPOV
 else if (POV = 9000) ; Left
-    KeyToHoldDown := LeftPOV
+    KeyToHoldDown := RightPOV
 else if POV = 18000 ; Down
     KeyToHoldDown := DownPOV
 else ; Right
-    KeyToHoldDown := RightPOV
+    KeyToHoldDown := LeftPOV
 if (KeyToHoldDown = KeyToHoldDownPrev)
     return
 SetKeyDelay -1
-if KeyToHoldDownPrev
-    Send, {%KeyToHoldDownPrev% up}
-if KeyToHoldDown  
-    Send, {%KeyToHoldDown% down}
+if (KeyToHoldDown = "Menu") {
+	ToolTip, `tP`n`nS`t`tI`n`n`tC,900,850
+	menuToggle := true
+	return
+} else {
+	menuToggle := false
+	ToolTip
+	if KeyToHoldDownPrev
+		Send, {%KeyToHoldDownPrev% up}
+	if KeyToHoldDown  
+		Send, {%KeyToHoldDown% down}
+}
 return
 
 AutoMoveAux:
@@ -275,10 +284,18 @@ return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Joy1:: ; SQUARE
-MovementSkill(JoyMultiplier)
+if menuToggle {
+	Send, s
+	return
+}
+Send, t
 return
 
 Joy2:: ; X
+if menuToggle {
+	Send, c
+	return
+}
 if GetKeyState("Joy7") ;; Unclick Protect
     return
 Click, down, left
@@ -286,10 +303,18 @@ SetTimer, WaitForButtonUp2, %SetTimerDelay%
 return
 
 Joy3:: ; CIRCLE
+if menuToggle {
+	Send, i
+	return
+}
 FlaskUtility()
 return
 
 Joy4:: ; TRIANGLE
+if menuToggle {
+	Send, p
+	return
+}
 FlaskLife()
 return
 
